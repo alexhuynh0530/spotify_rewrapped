@@ -17,9 +17,9 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 # local python files
-from keys import client_id, client_secret
+#from keys import client_id, client_secret
 
-port = 5000
+#port = 5000
 
 
 def top_tracks_cleaner(data):
