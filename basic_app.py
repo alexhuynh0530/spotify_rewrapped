@@ -118,9 +118,9 @@ def home():
 		#session['access_token'] = request.args.get('code')
 
 		return redirect('/user_data')
-
-	if os.path.exists(".cache"): 
-		os.remove(".cache")
+	
+	#if os.path.exists(".cache"): 
+	#	os.remove(".cache")
 	
 	# initial load in template this renders essentially only renders on the first load
 	return render_template('index.html')
