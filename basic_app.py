@@ -1,6 +1,5 @@
 
 from flask import Flask, render_template, request, redirect, session, url_for
-from credentials import CLIENT_ID, CLIENT_SECRET, SECRET_KEY
 
 # python modules for data manipulation and visualization
 import pandas as pd
@@ -8,6 +7,7 @@ import mpld3
 import seaborn as sns
 import matplotlib
 import os
+import time
 
 # this fixes the problem with threading in matplotlib
 matplotlib.use('Agg')
@@ -17,9 +17,9 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 # local python files
-# from keys import client_id, client_secret
+from keys import client_id, client_secret
 
-# port = 5000
+port = 5000
 
 
 def top_tracks_cleaner(data):
@@ -56,7 +56,7 @@ def top_artists_cleaner(data):
 
 app = Flask(__name__)
 app.secret_key = 'wowza'
-
+TOKEN_CODE = "token_info"
 
 # function passed to jinja
 @app.context_processor
@@ -75,7 +75,7 @@ def track_string_format():
 
 # TEST  --------
 
-cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path='cache.txt')
+#cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path='cache.txt')
 
 
 # ENDTEST -------
@@ -87,11 +87,14 @@ auth_manager = SpotifyOAuth(
 	'user-read-recently-played',
 	'user-library-read'
 	],
+	client_id=client_id,
 	client_id=os.environ['CLIENT_ID'],
+	#client_secret=client_secret,
 	client_secret=os.environ['CLIENT_SECRET'],
-	redirect_uri="https://spotifyrewrapped.herokuapp.com/",
-	show_dialog=True,
-	cache_handler=cache_handler
+	#redirect_uri=f"http://127.0.0.1:{port}",
+	redirect_uri=f"https://spotifyrewrapped.herokuapp.com/",
+	show_dialog=True
+	#cache_handler=cache_handler
 	)
 
 
@@ -103,9 +106,16 @@ def home():
 	if request.args.get('code'):
 		
 		# this saves the auth token into a session object
-		session['access_token'] = request.args.get('code')
-		with open('cache.txt', 'w') as cache:
-			cache.write(str(request.args))
+		# session['access_token'] = request.args.get('code')
+		# with open('cache.txt', 'w') as cache:
+		# 	cache.write(str(request.args))
+		
+		session.clear()
+		token_info = auth_manager.get_access_token(request.args.get('code'))
+		session[TOKEN_CODE] = token_info    
+
+		# this saves the auth token into a session object
+		#session['access_token'] = request.args.get('code')
 
 		return redirect('/user_data')
 
@@ -115,14 +125,43 @@ def home():
 	# initial load in template this renders essentially only renders on the first load
 	return render_template('index.html')
 
+
+
+# this route is essentially only the middleman so the page doesnt save
+@app.route('/login', methods=['POST'])
+def login_function():
+
+	auth_url = auth_manager.get_authorize_url()
+	return redirect(auth_url)
+
+
+def get_token(): 
+    token_info = session.get(TOKEN_CODE, None)
+    if not token_info: 
+        raise "exception"
+    now = int(time.time())
+    is_expired = token_info['expires_at'] - now < 60 
+    if (is_expired): 
+        token_info = auth_manager.refresh_access_token(token_info['refresh_token'])
+    return token_info 
+
+
 @app.route('/user_data')
 def user_data():
 	
-	with open('cache.txt', 'r') as cache:
-		auth_manager.get_access_token(cache.read())
-	sp = spotipy.Spotify(auth_manager=auth_manager)
-	os.remove('cache.txt')
+	try: 
+		token_info = get_token()
+	except: 
+		print("user not logged in")
+		return redirect("/")
 
+	# with open('cache.txt', 'r') as cache:
+	# 	auth_manager.get_access_token(cache.read())
+	# sp = spotipy.Spotify(auth_manager=auth_manager)
+	# os.remove('cache.txt')
+
+	auth_manager.get_access_token(session.get('access_token'))
+	sp = spotipy.Spotify(auth_manager=auth_manager)
 
 	if not request.args.get('time_range'):
 		return redirect('/user_data?time_range=short_term&search=tracks')
@@ -231,13 +270,6 @@ def user_data():
 	return '<a href="/">Home</a>'
 
 
-
-# this route is essentially only the middleman so the page doesnt save
-@app.route('/login', methods=['POST'])
-def login_function():
-
-	auth_url = auth_manager.get_authorize_url()
-	return redirect(auth_url)
 
 
 
