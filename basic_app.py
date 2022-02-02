@@ -17,7 +17,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 # local python files
-#from keys import client_id, client_secret
+# from keys import client_id, client_secret
 
 #port = 5000
 
@@ -87,7 +87,7 @@ auth_manager = SpotifyOAuth(
 	'user-read-recently-played',
 	'user-library-read'
 	],
-	client_id=client_id,
+	#client_id=client_id,
 	client_id=os.environ['CLIENT_ID'],
 	#client_secret=client_secret,
 	client_secret=os.environ['CLIENT_SECRET'],
