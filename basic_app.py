@@ -1,5 +1,6 @@
 
 from flask import Flask, render_template, request, redirect, session, url_for
+from credentials import CLIENT_ID, CLIENT_SECRET, SECRET_KEY
 
 # python modules for data manipulation and visualization
 import pandas as pd
@@ -72,7 +73,12 @@ def track_string_format():
 	return dict(delengthener=delengthener)
 
 
+# TEST  --------
 
+cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path='cache.txt')
+
+
+# ENDTEST -------
 
 
 # spotipy authentification object
@@ -81,10 +87,11 @@ auth_manager = SpotifyOAuth(
 	'user-read-recently-played',
 	'user-library-read'
 	],
-	client_id=os.environ.get('CLIENT_ID'),
-	client_secret=os.environ.get('CLIENT_SECRET'),
+	client_id=os.environ['CLIENT_ID'],
+	client_secret=os.environ['CLIENT_SECRET'],
 	redirect_uri="https://spotifyrewrapped.herokuapp.com/",
-	show_dialog=True
+	show_dialog=True,
+	cache_handler=cache_handler
 	)
 
 
@@ -97,6 +104,8 @@ def home():
 		
 		# this saves the auth token into a session object
 		session['access_token'] = request.args.get('code')
+		with open('cache.txt', 'w') as cache:
+			cache.write(str(request.args))
 
 		return redirect('/user_data')
 
@@ -109,9 +118,10 @@ def home():
 @app.route('/user_data')
 def user_data():
 	
-
-	auth_manager.get_access_token(session.get('access_token'))
+	with open('cache.txt', 'r') as cache:
+		auth_manager.get_access_token(cache.read())
 	sp = spotipy.Spotify(auth_manager=auth_manager)
+	os.remove('cache.txt')
 
 
 	if not request.args.get('time_range'):
