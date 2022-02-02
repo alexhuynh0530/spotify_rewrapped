@@ -16,10 +16,6 @@ matplotlib.use('Agg')
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-# local python files
-# from keys import client_id, client_secret
-
-#port = 5000
 
 
 def top_tracks_cleaner(data):
@@ -75,7 +71,7 @@ def track_string_format():
 
 # TEST  --------
 
-#cache_handler = spotipy.cache_handler.CacheFileHandler(cache_path='cache.txt')
+cache_handler = spotipy.cache_handler.MemoryCacheHandler()
 
 
 # ENDTEST -------
@@ -87,14 +83,11 @@ auth_manager = SpotifyOAuth(
 	'user-read-recently-played',
 	'user-library-read'
 	],
-	#client_id=client_id,
 	client_id=os.environ['CLIENT_ID'],
-	#client_secret=client_secret,
 	client_secret=os.environ['CLIENT_SECRET'],
-	#redirect_uri=f"http://127.0.0.1:{port}",
-	redirect_uri='https://spotifyrewrapped.herokuapp.com/',
-	show_dialog=True
-	#cache_handler=cache_handler
+	redirect_uri=f"https://spotifyrewrapped.herokuapp.com/",
+	show_dialog=True,
+	cache_handler=cache_handler
 	)
 
 
