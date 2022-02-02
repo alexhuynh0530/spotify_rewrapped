@@ -16,9 +16,9 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 # local python files
-#from keys import client_id, client_secret
+# from keys import client_id, client_secret
 
-#port = 5000
+# port = 5000
 
 
 def top_tracks_cleaner(data):
@@ -81,8 +81,8 @@ auth_manager = SpotifyOAuth(
 	'user-read-recently-played',
 	'user-library-read'
 	],
-	client_id=os.environ['client_id'],
-	client_secret=os.environ['client_secret'],
+	client_id=os.environ.get('CLIENT_ID'),
+	client_secret=os.environ.get('CLIENT_SECRET'),
 	redirect_uri="https://spotifyrewrapped.herokuapp.com/",
 	show_dialog=True
 	)
