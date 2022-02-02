@@ -16,9 +16,9 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 # local python files
-from keys import client_id, client_secret
+#from keys import client_id, client_secret
 
-port = 5000
+#port = 5000
 
 
 def top_tracks_cleaner(data):
@@ -81,8 +81,8 @@ auth_manager = SpotifyOAuth(
 	'user-read-recently-played',
 	'user-library-read'
 	],
-	client_id=client_id,
-	client_secret=client_secret,
+	client_id=os.environ['client_id'],
+	client_secret=os.environ['client_secret'],
 	redirect_uri=f"http://127.0.0.1:{port}",
 	show_dialog=True
 	)
