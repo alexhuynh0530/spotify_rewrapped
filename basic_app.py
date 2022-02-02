@@ -92,7 +92,7 @@ auth_manager = SpotifyOAuth(
 	#client_secret=client_secret,
 	client_secret=os.environ['CLIENT_SECRET'],
 	#redirect_uri=f"http://127.0.0.1:{port}",
-	redirect_uri=f"https://spotifyrewrapped.herokuapp.com/",
+	redirect_uri='https://spotifyrewrapped.herokuapp.com/',
 	show_dialog=True
 	#cache_handler=cache_handler
 	)
