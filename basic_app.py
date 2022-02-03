@@ -17,7 +17,6 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 
-
 def top_tracks_cleaner(data):
 	x = []
 	s = data['items']
@@ -85,7 +84,7 @@ auth_manager = SpotifyOAuth(
 	],
 	client_id=os.environ['CLIENT_ID'],
 	client_secret=os.environ['CLIENT_SECRET'],
-	redirect_uri=f"http://127.0.0.1:5000",
+	redirect_uri=url_for("redirectPage",_external=True),
 	show_dialog=True,
 	cache_handler=cache_handler
 	)
@@ -126,6 +125,15 @@ def login_function():
 
 	auth_url = auth_manager.get_authorize_url()
 	return redirect(auth_url)
+
+
+@app.route('/redirect')
+def redirectPage():
+    session.clear() 
+    code = request.args.get('code')
+    token_info = auth_manager.get_access_token(code)
+    session[TOKEN_CODE] = token_info    
+    return redirect(url_for("user_data", _external=True))
 
 
 def get_token(): 
