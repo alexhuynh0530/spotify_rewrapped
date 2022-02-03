@@ -84,7 +84,7 @@ auth_manager = SpotifyOAuth(
 	],
 	client_id=os.environ['CLIENT_ID'],
 	client_secret=os.environ['CLIENT_SECRET'],
-	redirect_uri=url_for("redirectPage",_external=True),
+	redirect_uri=f"https://spotifyrewrapped.herokuapp.com/",
 	show_dialog=True,
 	cache_handler=cache_handler
 	)
@@ -125,15 +125,6 @@ def login_function():
 
 	auth_url = auth_manager.get_authorize_url()
 	return redirect(auth_url)
-
-
-@app.route('/redirect')
-def redirectPage():
-    session.clear() 
-    code = request.args.get('code')
-    token_info = auth_manager.get_access_token(code)
-    session[TOKEN_CODE] = token_info    
-    return redirect(url_for("user_data", _external=True))
 
 
 def get_token(): 
